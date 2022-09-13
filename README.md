@@ -1,6 +1,12 @@
-# w3aflutter
+# Web3Auth x Flutter Demo Application
 
-A new Flutter project.
+## Guide
+
+https://web3auth.io/docs/guides/flutter
+
+## Documentation
+
+https://web3auth.io/docs/sdk/flutter/
 
 ## Getting Started
 
