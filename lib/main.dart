@@ -20,7 +20,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _result = '<empty>';
+  String _result = '';
   bool logoutVisible = false;
 
   @override
@@ -78,7 +78,38 @@ class _MyAppState extends State<MyApp> {
                 visible: !logoutVisible,
                 child: Column(
                   children: [
-                    const Text('Login with'),
+                    const Icon(
+                      Icons.flutter_dash,
+                      size: 80,
+                      color: Color(0xFF1389fd),
+                    ),
+                    const SizedBox(
+                      height: 40,
+                    ),
+                    const Text(
+                      'Web3Auth',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 36,
+                          color: Color(0xFF0364ff)),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    const Text(
+                      'Welcome to Web3Auth x Flutter Demo',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const Text(
+                      'Login with',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     ElevatedButton(
                         onPressed: _login(_withGoogle),
                         child: const Text('Google')),
@@ -146,7 +177,7 @@ class _MyAppState extends State<MyApp> {
     return () async {
       try {
         setState(() {
-          _result = '<empty>';
+          _result = '';
           logoutVisible = false;
         });
         await Web3AuthFlutter.logout();
