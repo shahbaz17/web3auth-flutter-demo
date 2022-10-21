@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -43,7 +42,7 @@ class _MyAppState extends State<MyApp> {
     if (Platform.isAndroid) {
       redirectUrl = Uri.parse('w3a://com.example.w3aflutter/auth');
     } else if (Platform.isIOS) {
-      redirectUrl = Uri.parse('w3a://com.example.w3aflutter');
+      redirectUrl = Uri.parse('com.example.w3aflutter://openlogin');
     } else {
       throw UnKnownException('Unknown platform');
     }
@@ -204,7 +203,7 @@ class _MyAppState extends State<MyApp> {
     return Web3AuthFlutter.login(LoginParams(
         loginProvider: Provider.email_passwordless,
         extraLoginOptions:
-            ExtraLoginOptions(login_hint: "shahbaz@web3auth.io")));
+            ExtraLoginOptions(login_hint: "shahbaz+flutterdemo@web3auth.io")));
   }
 
   Future<Web3AuthResponse> _withDiscord() {
