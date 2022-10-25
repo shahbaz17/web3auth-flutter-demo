@@ -9,6 +9,10 @@ import 'dart:async';
 
 import 'package:web3auth_flutter/web3auth_flutter.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -35,6 +39,10 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
     final themeMap = HashMap<String, String>();
     themeMap['primary'] = "#229954";
 
@@ -130,7 +138,7 @@ class _MyAppState extends State<MyApp> {
                         child: const Text('Email Passwordless')),
                     ElevatedButton(
                         onPressed: _login(_withJWT),
-                        child: const Text('Login with JWT')),
+                        child: const Text('Login with JWT via Firebase')),
                     ElevatedButton(
                         onPressed: _login(_withDiscord),
                         child: const Text('Discord')),
@@ -219,13 +227,27 @@ class _MyAppState extends State<MyApp> {
             ExtraLoginOptions(login_hint: "shahbaz+flutterdemo@web3auth.io")));
   }
 
-  Future<Web3AuthResponse> _withJWT() {
+  Future<Web3AuthResponse> _withJWT() async {
+    var idToken = "";
+    try {
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: 'custom+jwt@firebase.login', password: 'Testing@123');
+      print("TOKEN IS HERE");
+      idToken = (await credential.user?.getIdToken(true)).toString();
+      print(idToken);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        print('Wrong password provided for that user.');
+      }
+    }
+    print("OUTSIDE TOKEN IS HERE");
+    print(idToken);
     return Web3AuthFlutter.login(LoginParams(
         loginProvider: Provider.jwt,
-        extraLoginOptions: ExtraLoginOptions(
-            id_token:
-                'eyJhbGciOiJSUzI1NiIsImtpZCI6IjVkMzQwZGRiYzNjNWJhY2M0Y2VlMWZiOWQxNmU5ODM3ZWM2MTYzZWIiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiTW9oYW1tYWQgU2hhaGJheiBBbGFtIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FMbTV3dTNFelhsMzAtZWhoM2tRXzI3Z0FtQm1XTkhjZEtHRDYxd0xuRHhMPXM5Ni1jIiwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL3dlYjNhdXRoLW9hdXRoLWxvZ2lucyIsImF1ZCI6IndlYjNhdXRoLW9hdXRoLWxvZ2lucyIsImF1dGhfdGltZSI6MTY2NjM1MDk2MywidXNlcl9pZCI6ImZhajI3MjBpMmZkRzdOc3F6bk9LcnRoRHZxNDMiLCJzdWIiOiJmYWoyNzIwaTJmZEc3TnNxem5PS3J0aER2cTQzIiwiaWF0IjoxNjY2MzUwOTY1LCJleHAiOjE2NjYzNTQ1NjUsImVtYWlsIjoic2hhaGJhekB0b3IudXMiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJnb29nbGUuY29tIjpbIjEwMzgzMjQxOTUyOTE3MDYzMDQ1NSJdLCJlbWFpbCI6WyJzaGFoYmF6QHRvci51cyJdfSwic2lnbl9pbl9wcm92aWRlciI6Imdvb2dsZS5jb20ifX0.rjGk30aDnCW4o9Jol5M-sl7Ypd-Q3FvhRW6PG3uPslPbDrCLJgHW_PtjdBGVZPi4NjtQ72yAlv6JByWep-tLZgwyVkYgH8Btgv2tMCtAP3bVwHeI4uHUz_wulTkUQOOrm0ZESvYZ26JWREtSelvEDZW6e0RiMAFmGy67Kq1Jfj7lq2YXSK25hs6E4CDyxYPRdn6D2K180xCIWPgSQ86xjz3BEcZ9yyxGAMAIPfhlaq2Ef2I9lOZA7q7YLVkhDlIdii2zOf4wCajJUyAbUUU6Zp81OLjvB_6JwUWLWUfmWG31Fa5nuODKjbDz2Ky7qybrrxYlf4vjLd1X6D04fmmUzQ',
-            domain: 'anything')));
+        extraLoginOptions:
+            ExtraLoginOptions(id_token: idToken, domain: 'anything')));
   }
 
   Future<Web3AuthResponse> _withDiscord() {
