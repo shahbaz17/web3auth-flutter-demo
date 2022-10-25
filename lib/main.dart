@@ -9,6 +9,10 @@ import 'dart:async';
 
 import 'package:web3auth_flutter/web3auth_flutter.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -35,7 +39,11 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    HashMap themeMap = HashMap<String, String>();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    final themeMap = HashMap<String, String>();
     themeMap['primary'] = "#229954";
 
     Uri redirectUrl;
@@ -47,13 +55,23 @@ class _MyAppState extends State<MyApp> {
       throw UnKnownException('Unknown platform');
     }
 
+    final loginConfig = HashMap<String, LoginConfigItem>();
+    loginConfig['jwt'] = LoginConfigItem(
+        verifier: "web3auth-core-firebase", // get it from web3auth dashboard
+        typeOfLogin: TypeOfLogin.jwt,
+        name: "Custom JWT Login",
+        clientId:
+            "BHZPoRIHdrfrdXj5E8G5Y72LGnh7L8UFuM8O0KrZSOs4T8lgiZnebB5Oc6cbgYSo3qSz7WBZXIs8fs6jgZqFFgw" // web3auth's plug and play client id
+        );
+
     await Web3AuthFlutter.init(Web3AuthOptions(
         clientId:
             'BHZPoRIHdrfrdXj5E8G5Y72LGnh7L8UFuM8O0KrZSOs4T8lgiZnebB5Oc6cbgYSo3qSz7WBZXIs8fs6jgZqFFgw',
         network: Network.testnet,
         redirectUrl: redirectUrl,
         whiteLabel: WhiteLabelData(
-            dark: true, name: "Web3Auth Flutter App", theme: themeMap)));
+            dark: true, name: "Web3Auth Flutter App", theme: themeMap),
+        loginConfig: loginConfig));
   }
 
   @override
@@ -118,6 +136,9 @@ class _MyAppState extends State<MyApp> {
                     ElevatedButton(
                         onPressed: _login(_withEmailPasswordless),
                         child: const Text('Email Passwordless')),
+                    ElevatedButton(
+                        onPressed: _login(_withJWT),
+                        child: const Text('Login with JWT via Firebase')),
                     ElevatedButton(
                         onPressed: _login(_withDiscord),
                         child: const Text('Discord')),
@@ -204,6 +225,29 @@ class _MyAppState extends State<MyApp> {
         loginProvider: Provider.email_passwordless,
         extraLoginOptions:
             ExtraLoginOptions(login_hint: "shahbaz+flutterdemo@web3auth.io")));
+  }
+
+  Future<Web3AuthResponse> _withJWT() async {
+    var idToken = "";
+    try {
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: 'custom+jwt@firebase.login', password: 'Testing@123');
+      print("TOKEN IS HERE");
+      idToken = (await credential.user?.getIdToken(true)).toString();
+      print(idToken);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        print('Wrong password provided for that user.');
+      }
+    }
+    print("OUTSIDE TOKEN IS HERE");
+    print(idToken);
+    return Web3AuthFlutter.login(LoginParams(
+        loginProvider: Provider.jwt,
+        extraLoginOptions:
+            ExtraLoginOptions(id_token: idToken, domain: 'anything')));
   }
 
   Future<Web3AuthResponse> _withDiscord() {
