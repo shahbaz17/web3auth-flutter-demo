@@ -128,20 +128,40 @@ class _MyAppState extends State<MyApp> {
                       height: 20,
                     ),
                     ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(
+                                255, 72, 133, 237) // This is what you need!
+                            ),
                         onPressed: _login(_withGoogle),
                         child: const Text('Google')),
                     ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(
+                                255, 59, 89, 152) // This is what you need!
+                            ),
                         onPressed: _login(_withFacebook),
                         child: const Text('Facebook')),
                     ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(
+                                255, 114, 137, 218) // This is what you need!
+                            ),
+                        onPressed: _login(_withDiscord),
+                        child: const Text('Discord')),
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(
+                                255, 3, 59, 54) // This is what you need!
+                            ),
                         onPressed: _login(_withEmailPasswordless),
                         child: const Text('Email Passwordless')),
                     ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(
+                                255, 245, 130, 13) // This is what you need!
+                            ),
                         onPressed: _login(_withJWT),
                         child: const Text('Login with JWT via Firebase')),
-                    ElevatedButton(
-                        onPressed: _login(_withDiscord),
-                        child: const Text('Discord')),
                   ],
                 ),
               ),
