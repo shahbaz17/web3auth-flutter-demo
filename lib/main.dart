@@ -232,9 +232,7 @@ class _MyAppState extends State<MyApp> {
     try {
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: 'custom+jwt@firebase.login', password: 'Testing@123');
-      print("TOKEN IS HERE");
       idToken = (await credential.user?.getIdToken(true)).toString();
-      print(idToken);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         print('No user found for that email.');
@@ -242,8 +240,7 @@ class _MyAppState extends State<MyApp> {
         print('Wrong password provided for that user.');
       }
     }
-    print("OUTSIDE TOKEN IS HERE");
-    print(idToken);
+
     return Web3AuthFlutter.login(LoginParams(
         loginProvider: Provider.jwt,
         extraLoginOptions:
