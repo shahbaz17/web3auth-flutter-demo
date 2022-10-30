@@ -13,6 +13,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'package:http/http.dart';
+import 'package:web3dart/web3dart.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -72,6 +75,16 @@ class _MyAppState extends State<MyApp> {
         whiteLabel: WhiteLabelData(
             dark: true, name: "Web3Auth Flutter App", theme: themeMap),
         loginConfig: loginConfig));
+
+    // const String privateKey =
+    //     '20623a6a7d966af49b926f4c83ec3d5aea89480872310c41831aba73a82539a0';
+    // const String rpcUrl = 'https://rpc.ankr.com/eth';
+
+    // final client = Web3Client(rpcUrl, Client());
+    // final credentials = EthPrivateKey.fromHex(privateKey);
+    // final address = credentials.address;
+    // print(address.hexEip55);
+    // print(await client.getBalance(address));
   }
 
   @override
@@ -182,6 +195,31 @@ class _MyAppState extends State<MyApp> {
                             ],
                           )),
                     ),
+                    const Text(
+                      'Blockchain calls',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(
+                                255, 195, 47, 233) // This is what you need!
+                            ),
+                        onPressed: _getAddress,
+                        child: const Text('Get Address')),
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(
+                                255, 195, 47, 233) // This is what you need!
+                            ),
+                        onPressed: _getBalance,
+                        child: const Text('Get Balance')),
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(
+                                255, 195, 47, 233) // This is what you need!
+                            ),
+                        onPressed: _sendTransaction,
+                        child: const Text('Send Transaction')),
                   ],
                 ),
                 visible: logoutVisible,
@@ -269,5 +307,61 @@ class _MyAppState extends State<MyApp> {
 
   Future<Web3AuthResponse> _withDiscord() {
     return Web3AuthFlutter.login(LoginParams(loginProvider: Provider.discord));
+  }
+
+  Future<String> _getAddress() async {
+    const String privateKey =
+        '20623a6a7d966af49b926f4c83ec3d5aea89480872310c41831aba73a82539a0';
+    const String rpcUrl = 'https://rpc.ankr.com/eth_goerli';
+
+    final client = Web3Client(rpcUrl, Client());
+    final credentials = EthPrivateKey.fromHex(privateKey);
+    final address = credentials.address;
+    print(address.hexEip55);
+    setState(() {
+      _result = address.hexEip55.toString();
+    });
+    return address.hexEip55;
+  }
+
+  Future<EtherAmount> _getBalance() async {
+    const String privateKey =
+        '20623a6a7d966af49b926f4c83ec3d5aea89480872310c41831aba73a82539a0';
+    const String rpcUrl = 'https://rpc.ankr.com/eth_goerli';
+
+    final client = Web3Client(rpcUrl, Client());
+    final credentials = EthPrivateKey.fromHex(privateKey);
+    final address = credentials.address;
+    final balance = await client.getBalance(address);
+    print(balance);
+    setState(() {
+      _result = balance.toString();
+    });
+    return balance;
+  }
+
+  Future<String> _sendTransaction() async {
+    const String privateKey =
+        '20623a6a7d966af49b926f4c83ec3d5aea89480872310c41831aba73a82539a0';
+    const String rpcUrl = 'https://rpc.ankr.com/eth_goerli';
+
+    final client = Web3Client(rpcUrl, Client());
+    final credentials = EthPrivateKey.fromHex(privateKey);
+    final address = credentials.address;
+    final receipt = await client.sendTransaction(
+        credentials,
+        Transaction(
+          from: address,
+          to: EthereumAddress.fromHex(
+              '0x93D08D1707581A46c678729E247292F6f8869028'),
+          gasPrice: EtherAmount.inWei(BigInt.one),
+          maxGas: 10000000,
+          value: EtherAmount.fromUnitAndValue(EtherUnit.wei, 100),
+        ),
+        chainId: 5);
+    setState(() {
+      _result = receipt;
+    });
+    return receipt;
   }
 }
