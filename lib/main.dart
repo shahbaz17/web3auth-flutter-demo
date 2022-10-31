@@ -16,6 +16,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart';
 import 'package:web3dart/web3dart.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -239,6 +241,8 @@ class _MyAppState extends State<MyApp> {
     return () async {
       try {
         final Web3AuthResponse response = await method();
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('privateKey', response.privKey.toString());
         setState(() {
           _result = response.toString();
           logoutVisible = true;
@@ -258,6 +262,8 @@ class _MyAppState extends State<MyApp> {
           _result = '';
           logoutVisible = false;
         });
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('privateKey');
         await Web3AuthFlutter.logout();
       } on UserCancelledException {
         print("User cancelled.");
@@ -310,8 +316,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<String> _getAddress() async {
-    const String privateKey =
-        '20623a6a7d966af49b926f4c83ec3d5aea89480872310c41831aba73a82539a0';
+    final prefs = await SharedPreferences.getInstance();
+    final privateKey = prefs.getString('privateKey') ?? '0';
     const String rpcUrl = 'https://rpc.ankr.com/eth_goerli';
 
     final client = Web3Client(rpcUrl, Client());
@@ -325,8 +331,10 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<EtherAmount> _getBalance() async {
-    const String privateKey =
-        '20623a6a7d966af49b926f4c83ec3d5aea89480872310c41831aba73a82539a0';
+    final prefs = await SharedPreferences.getInstance();
+    final privateKey = prefs.getString('privateKey') ?? '0';
+    // const String privateKey =
+    //     '20623a6a7d966af49b926f4c83ec3d5aea89480872310c41831aba73a82539a0';
     const String rpcUrl = 'https://rpc.ankr.com/eth_goerli';
 
     final client = Web3Client(rpcUrl, Client());
@@ -341,8 +349,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<String> _sendTransaction() async {
-    const String privateKey =
-        '20623a6a7d966af49b926f4c83ec3d5aea89480872310c41831aba73a82539a0';
+    final prefs = await SharedPreferences.getInstance();
+    final privateKey = prefs.getString('privateKey') ?? '0';
     const String rpcUrl = 'https://rpc.ankr.com/eth_goerli';
 
     final client = Web3Client(rpcUrl, Client());
@@ -353,12 +361,13 @@ class _MyAppState extends State<MyApp> {
         Transaction(
           from: address,
           to: EthereumAddress.fromHex(
-              '0x93D08D1707581A46c678729E247292F6f8869028'),
-          gasPrice: EtherAmount.inWei(BigInt.one),
-          maxGas: 10000000,
-          value: EtherAmount.fromUnitAndValue(EtherUnit.wei, 100),
+              '0x809D4310d578649D8539e718030EE11e603Ee8f3'),
+          // gasPrice: EtherAmount.fromUnitAndValue(EtherUnit.gwei, 100),
+          value: EtherAmount.fromUnitAndValue(
+              EtherUnit.gwei, 5000000), // 0.005 ETH
         ),
         chainId: 5);
+    print(receipt);
     setState(() {
       _result = receipt;
     });
