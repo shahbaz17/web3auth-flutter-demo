@@ -13,23 +13,27 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart';
 import 'package:web3dart/web3dart.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
   String _result = '';
   bool logoutVisible = false;
+  String rpcUrl = 'https://rpc.ankr.com/eth_goerli';
 
   @override
   void dispose() {
@@ -77,16 +81,6 @@ class _MyAppState extends State<MyApp> {
         whiteLabel: WhiteLabelData(
             dark: true, name: "Web3Auth Flutter App", theme: themeMap),
         loginConfig: loginConfig));
-
-    // const String privateKey =
-    //     '20623a6a7d966af49b926f4c83ec3d5aea89480872310c41831aba73a82539a0';
-    // const String rpcUrl = 'https://rpc.ankr.com/eth';
-
-    // final client = Web3Client(rpcUrl, Client());
-    // final credentials = EthPrivateKey.fromHex(privateKey);
-    // final address = credentials.address;
-    // print(address.hexEip55);
-    // print(await client.getBalance(address));
   }
 
   @override
@@ -248,9 +242,9 @@ class _MyAppState extends State<MyApp> {
           logoutVisible = true;
         });
       } on UserCancelledException {
-        print("User cancelled.");
+        debugPrint("User cancelled.");
       } on UnKnownException {
-        print("Unknown exception occurred");
+        debugPrint("Unknown exception occurred");
       }
     };
   }
@@ -266,9 +260,9 @@ class _MyAppState extends State<MyApp> {
         await prefs.remove('privateKey');
         await Web3AuthFlutter.logout();
       } on UserCancelledException {
-        print("User cancelled.");
+        debugPrint("User cancelled.");
       } on UnKnownException {
-        print("Unknown exception occurred");
+        debugPrint("Unknown exception occurred");
       }
     };
   }
@@ -299,9 +293,9 @@ class _MyAppState extends State<MyApp> {
       idToken = (await credential.user?.getIdToken(true)).toString();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        print('No user found for that email.');
+        debugPrint('No user found for that email.');
       } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
+        debugPrint('Wrong password provided for that user.');
       }
     }
 
@@ -318,12 +312,12 @@ class _MyAppState extends State<MyApp> {
   Future<String> _getAddress() async {
     final prefs = await SharedPreferences.getInstance();
     final privateKey = prefs.getString('privateKey') ?? '0';
-    const String rpcUrl = 'https://rpc.ankr.com/eth_goerli';
+    // const String rpcUrl = 'https://rpc.ankr.com/eth_goerli';
 
-    final client = Web3Client(rpcUrl, Client());
+    // final client = Web3Client(rpcUrl, Client());
     final credentials = EthPrivateKey.fromHex(privateKey);
     final address = credentials.address;
-    print(address.hexEip55);
+    debugPrint("Account, ${address.hexEip55}");
     setState(() {
       _result = address.hexEip55.toString();
     });
@@ -333,15 +327,12 @@ class _MyAppState extends State<MyApp> {
   Future<EtherAmount> _getBalance() async {
     final prefs = await SharedPreferences.getInstance();
     final privateKey = prefs.getString('privateKey') ?? '0';
-    // const String privateKey =
-    //     '20623a6a7d966af49b926f4c83ec3d5aea89480872310c41831aba73a82539a0';
-    const String rpcUrl = 'https://rpc.ankr.com/eth_goerli';
 
     final client = Web3Client(rpcUrl, Client());
     final credentials = EthPrivateKey.fromHex(privateKey);
     final address = credentials.address;
     final balance = await client.getBalance(address);
-    print(balance);
+    debugPrint(balance.toString());
     setState(() {
       _result = balance.toString();
     });
@@ -351,7 +342,6 @@ class _MyAppState extends State<MyApp> {
   Future<String> _sendTransaction() async {
     final prefs = await SharedPreferences.getInstance();
     final privateKey = prefs.getString('privateKey') ?? '0';
-    const String rpcUrl = 'https://rpc.ankr.com/eth_goerli';
 
     final client = Web3Client(rpcUrl, Client());
     final credentials = EthPrivateKey.fromHex(privateKey);
@@ -367,7 +357,7 @@ class _MyAppState extends State<MyApp> {
               EtherUnit.gwei, 5000000), // 0.005 ETH
         ),
         chainId: 5);
-    print(receipt);
+    debugPrint(receipt);
     setState(() {
       _result = receipt;
     });
